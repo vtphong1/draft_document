@@ -1,0 +1,71 @@
+Best way to show error messages for angular reactive forms, one formcontrol multiple validation errors?
+// Tạo error mesage common
+
+IntersectionObserver
+// Javascript
+
+//Create path alias replace for path hell (../../..//)
+Cấu hình trong file tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@app/*": ["app/*"],
+      "@shared/*": ["app/shared/*"],
+      "@components/*": ["app/components/*"],
+      "@services/*": ["app/services/*"],
+      "@utils/*": ["app/utils/*"]
+    }
+  }
+}
+
+// Cấu hình build product trên nhiều môi trường
+------Bước 1: Cấu hình file angular.json------
+"configurations": {
+  "production": {
+    "fileReplacements": [
+      {
+        "replace": "src/environments/environment.ts",
+        "with": "src/environments/environment.prod.ts"
+      }
+    ],
+    "optimization": true,
+    "outputHashing": "all",
+    "sourceMap": false,
+    "extractCss": true,
+    "namedChunks": false,
+    "aot": true,
+    "extractLicenses": true,
+    "vendorChunk": false,
+    "buildOptimizer": true
+  },
+  "staging": {
+    "fileReplacements": [
+      {
+        "replace": "src/environments/environment.ts",
+        "with": "src/environments/environment.staging.ts"
+      }
+    ],
+    "optimization": true,
+    "outputHashing": "all",
+    "sourceMap": false,
+    "extractCss": true,
+    "namedChunks": false,
+    "aot": true,
+    "extractLicenses": true,
+    "vendorChunk": false,
+    "buildOptimizer": true
+  }
+}
+-----Bước 2: Cấu hình file package.json----------
+"scripts": {
+  "build:prod": "ng build --configuration=production",
+  "build:staging": "ng build --configuration=staging"
+}
+
+// How to use environment variables to configure your Angular application without a rebuild------- link: https://www.jvandemo.com/how-to-use-environment-variables-to-configure-your-angular-application-without-a-rebuild/
+
+
+//Create directive like ngIf angular: 
+link: https://juristr.com/blog/2018/02/angular-permission-directive/
+Extend the *ngIf Syntax to Create a Custom Permission Directive
