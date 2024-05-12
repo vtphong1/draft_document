@@ -1,0 +1,60 @@
+import { Component, OnInit } from '@angular/core';
+import {MatTableDataSource} from '@angular/material/table';
+import { FormArray, FormBuilder} from '@angular/forms';
+
+const ELEMENT_DATA: any[] = [
+    {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H', fieldFail: ['name']},
+    {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He',  fieldFail: ['weight']},
+    {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li', fieldFail: ['symbol']},
+    {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
+    {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
+    {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
+    {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
+    {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
+    {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
+    {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+    {position: 11, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+];
+@Component({
+  selector: 'app-view-log',
+  templateUrl: './view-log.component.html',
+  styleUrls: ['./view-log.component.scss']
+})
+export class ViewLogComponent implements OnInit {
+    displayedColumns: string[] = ['position', 'name', 'weight', 'symbol', 'action'];
+    dataSource = new MatTableDataSource<any>();
+
+    formData = this.fb.group({
+        formRows: this.fb.array([])
+    });
+    data = ELEMENT_DATA;
+
+  constructor(private fb: FormBuilder,
+              private _formBuilder: FormBuilder) { }
+  ngOnInit(): void {
+      this.patchFormData(ELEMENT_DATA);
+  }
+  patchFormData(data: any): void{
+      this.formData = this.fb.group({
+          formRows: this.fb.array(data.map(val => this.fb.group({
+              position: [val.position],
+              name: [val.name],
+              weight: [val.weight],
+              symbol: [val.symbol],
+              fieldFail: [val?.fieldFail],
+              isEditRow: [true],
+              })
+          ))
+      });
+
+      this.dataSource = new MatTableDataSource((this.formData.get('formRows') as FormArray).controls);
+  }
+    editRowInline(formData, i, row, column): void {
+        const temp = row.getRawValue()?.[column];
+        formData.get('formRows').at(i).get('isEditRow').patchValue(false);
+    }
+
+    callApi(): void {
+        console.log('call api');
+    }
+}
