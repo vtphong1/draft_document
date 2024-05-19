@@ -1,0 +1,96 @@
+import {
+    AfterViewInit,
+    Component,
+    ComponentFactoryResolver,
+    Directive, ElementRef,
+    EventEmitter,
+    HostBinding,
+    HostListener,
+    Input, OnInit,
+    Output, Renderer2,
+    TemplateRef, ViewChild,
+    ViewContainerRef
+} from '@angular/core';
+
+@Directive({
+    selector: '[appDragDropFile]'
+})
+export class DragDropFileDirective implements OnInit {
+    @Output() fileDropped = new EventEmitter<any>();
+    @Input() dropZoneTemplate: TemplateRef<any> | null = null;
+    private defaultDropZoneTemplate: TemplateRef<any>;
+    private originalContent: any;
+
+    constructor(private viewContainer: ViewContainerRef, private resolver: ComponentFactoryResolver, private elementRef: ElementRef, private renderer: Renderer2) {
+    }
+
+    ngOnInit(): void {
+        this.originalContent = Array.from(this.elementRef.nativeElement.childNodes);
+    }
+
+    private createDefaultDropZoneTemplate(): void {
+        const factory = this.resolver.resolveComponentFactory(DropZoneDefaultComponent);
+        const componentRef = this.viewContainer.createComponent(factory);
+        // @ts-ignore
+        this.defaultDropZoneTemplate = componentRef.instance.template;
+    }
+
+    // Dragover listener
+    @HostListener('dragover', ['$event']) onDragOver(evt): void {
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.viewContainer.clear();
+        let a;
+        if (!this.dropZoneTemplate) {
+            this.createDefaultDropZoneTemplate();
+            a = this.viewContainer.createEmbeddedView(this.defaultDropZoneTemplate);
+        } else {
+            a = this.viewContainer.createEmbeddedView(this.dropZoneTemplate);
+        }
+        this.elementRef.nativeElement.innerHTML = '';
+        // Tạo một view mới từ template truyền vào và thay thế hoàn toàn nội dung của phần tử
+        this.elementRef.nativeElement.appendChild(a.rootNodes[0]);
+    }
+
+    // Dragleave listener
+    @HostListener('dragleave', ['$event'])
+    public onDragLeave(evt): void {
+        evt.preventDefault();
+        evt.stopPropagation();
+        this.viewContainer.clear();
+        // Khôi phục đối tượng DOM ban đầu
+        this.elementRef.nativeElement.innerHTML = '';
+        this.originalContent.forEach(node => this.elementRef.nativeElement.appendChild(node));
+    }
+
+    // Drop listener
+    @HostListener('drop', ['$event'])
+    public ondrop(evt): void {
+        evt.preventDefault();
+        evt.stopPropagation();
+        // this.elementRef.nativeElement.innerHTML = this.originalContent;
+        this.viewContainer.clear();
+        // Khôi phục đối tượng DOM ban đầu
+        this.elementRef.nativeElement.innerHTML = '';
+        this.originalContent.forEach(node => this.elementRef.nativeElement.appendChild(node));
+        const files = evt.dataTransfer.files;
+        if (files.length > 0) {
+            this.fileDropped.emit(files);
+        }
+    }
+
+}
+
+@Component({
+    selector: 'app-drop-zone-default',
+    template: `
+        <ng-template #defaultDropZone>
+            <div class="drop-zone">
+                Kéo và thả file vào đây
+            </div>
+        </ng-template>
+    `
+})
+export class DropZoneDefaultComponent {
+    @ViewChild('defaultDropZone', {static: true}) template: TemplateRef<any>;
+}
